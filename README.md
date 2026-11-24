@@ -40,6 +40,11 @@ Le foto non lasciano mai il telefono: la lettura avviene nel browser (`lettore.j
 
 Su richiesta di Stefano, per le prove il login è spento: chi apre la pagina scrive nell'officina di prova A. Usare solo targhe di prova. **Prima del lancio** togliere `ACCESSO_LIBERO` da `wrangler.toml` e ridistribuire il Worker, mettere `ACCESSO_LIBERO = false` in `index.html`, aumentare la cache in `sw.js` e pubblicare. Il login e le utenze restano pronti; `strumenti/prova_app.py` si rilancia dopo averlo riacceso.
 
+## Copia di sicurezza (CSV)
+
+In fondo alla home: **Esporta copia (CSV)** scarica tutte le targhe dell'officina, una riga per ruota (`targa;tipo;assi;posizione;id_sensore;id_precedente;aggiornato;creato_mezzo`, separatore `;`, ID scritti come `="00AB12"` perché Excel non tolga gli zeri). Su iPhone si apre il foglio di condivisione («Salva su File»).
+**Importa copia** rilegge lo stesso file e aggiunge solo ciò che manca: gli ID già salvati non vengono mai toccati, quelli diversi dal file vengono elencati. Serve per ripristinare dopo un problema, oltre ai 7 giorni di Time Travel di D1.
+
 ## Officine (utenze)
 
 Nessuna registrazione libera: l'agente MAK chiede l'attivazione, poi dal Mac:

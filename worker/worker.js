@@ -54,9 +54,9 @@ function json(dati, stato = 200, extra = {}) {
 
 const ora = () => new Date().toISOString();
 
-async function corpo(req) {
+async function corpo(req, max = 4000) {
   const t = await req.text();
-  if (t.length > 4000) throw new Errore(413, 'Richiesta troppo grande.');
+  if (t.length > max) throw new Errore(413, 'Richiesta troppo grande.');
   if (!t) return {};
   try { const o = JSON.parse(t); if (o && typeof o === 'object' && !Array.isArray(o)) return o; } catch (e) { /* sotto */ }
   throw new Errore(400, 'Richiesta non valida.');
@@ -171,6 +171,8 @@ async function instrada(req, env) {
   }
   if (p === '/io' && M === 'GET') return json({ officina: { nome: off.nome } });
   if (p === '/mezzi' && M === 'POST') return creaMezzo(req, env, off);
+  if (p === '/esporta' && M === 'GET') return esporta(env, off);
+  if (p === '/importa' && M === 'POST') return importa(req, env, off);
 
   let m = p.match(/^\/mezzi\/([^/]+)$/);
   if (m) {
@@ -349,4 +351,94 @@ async function cancellaRuota(req, env, off, targa, pos) {
   if (b.versione !== r.versione) throw new Errore(409, 'Un altro dispositivo ha cambiato questa ruota nel frattempo.');
   await env.DB.prepare('DELETE FROM ruote WHERE mezzo_id = ? AND posizione = ? AND versione = ?').bind(m.id, pos, r.versione).run();
   return json(await schedaMezzo(env, m));
+}
+
+// ---------- copia di sicurezza ----------
+
+async function esporta(env, off) {
+  const [m, r] = await env.DB.batch([
+    env.DB.prepare('SELECT id, targa, tipo, configurazione_json, creato, aggiornato FROM mezzi WHERE officina_id = ? ORDER BY targa').bind(off.id),
+    env.DB.prepare(
+      'SELECT r.mezzo_id, r.posizione, r.sensore_id, r.id_precedente, r.aggiornato FROM ruote r JOIN mezzi m ON m.id = r.mezzo_id WHERE m.officina_id = ? ORDER BY r.posizione'
+    ).bind(off.id),
+  ]);
+  const perMezzo = {};
+  for (const x of r.results || []) (perMezzo[x.mezzo_id] = perMezzo[x.mezzo_id] || []).push(
+    { posizione: x.posizione, sensore_id: x.sensore_id, id_precedente: x.id_precedente, aggiornato: x.aggiornato });
+  return json({
+    officina: off.nome, esportato: ora(),
+    mezzi: (m.results || []).map(x => ({
+      targa: x.targa, tipo: x.tipo,
+      configurazione: x.configurazione_json ? JSON.parse(x.configurazione_json) : null,
+      creato: x.creato, aggiornato: x.aggiornato, ruote: perMezzo[x.id] || [],
+    })),
+  });
+}
+
+// Ripristino da copia: aggiunge solo ciò che manca. Gli ID già salvati non si toccano mai;
+// quelli diversi dal file vengono solo contati ed elencati.
+async function importa(req, env, off) {
+  const b = await corpo(req, 2_000_000);
+  if (!Array.isArray(b.mezzi) || b.mezzi.length > 5000) throw new Errore(400, 'File non valido.');
+  const dataOk = s => (typeof s === 'string' && !isNaN(Date.parse(s))) ? new Date(s).toISOString() : null;
+  const esito = { mezzi_nuovi: 0, assi_impostati: 0, id_nuovi: 0, id_uguali: 0, id_diversi: [], scartati: [] };
+
+  // stato attuale dell'officina
+  const [mm, rr] = await env.DB.batch([
+    env.DB.prepare('SELECT id, targa, configurazione_json FROM mezzi WHERE officina_id = ?').bind(off.id),
+    env.DB.prepare('SELECT r.mezzo_id, r.posizione, r.sensore_id FROM ruote r JOIN mezzi m ON m.id = r.mezzo_id WHERE m.officina_id = ?').bind(off.id),
+  ]);
+  const mezzi = new Map((mm.results || []).map(x => [x.targa, x]));
+  const ruote = new Map((rr.results || []).map(x => [x.mezzo_id + '|' + x.posizione, x.sensore_id]));
+
+  // 1) mezzi nuovi e assi mancanti
+  const t = ora(), st = [], validi = [];
+  for (const x of b.mezzi) {
+    let targa, conf = null;
+    try {
+      targa = normTarga(x && x.targa);
+      if (!TIPI.includes(x.tipo)) throw new Errore(400, 'tipo non valido');
+      if (x.configurazione) conf = controllaConfigurazione(x.configurazione);
+    } catch (e) { esito.scartati.push(String((x && x.targa) || '?') + ': ' + e.message); continue; }
+    const c = mezzi.get(targa);
+    if (!c) {
+      st.push(env.DB.prepare('INSERT INTO mezzi (officina_id, targa, tipo, configurazione_json, creato, aggiornato) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(off.id, targa, x.tipo, conf ? JSON.stringify(conf) : null, dataOk(x.creato) || t, dataOk(x.aggiornato) || t));
+      esito.mezzi_nuovi++;
+    } else if (!c.configurazione_json && conf) {
+      st.push(env.DB.prepare('UPDATE mezzi SET configurazione_json = ? WHERE id = ?').bind(JSON.stringify(conf), c.id));
+      esito.assi_impostati++;
+    }
+    validi.push({ targa, ruote: Array.isArray(x.ruote) ? x.ruote : [] });
+  }
+  for (let i = 0; i < st.length; i += 100) await env.DB.batch(st.slice(i, i + 100));
+
+  // 2) ruote mancanti, solo nelle posizioni che esistono nello schema salvato
+  const dopo = await env.DB.prepare('SELECT id, targa, configurazione_json FROM mezzi WHERE officina_id = ?').bind(off.id).all();
+  const perTarga = new Map((dopo.results || []).map(x => [x.targa, x]));
+  const sr = [];
+  for (const v of validi) {
+    const m = perTarga.get(v.targa); if (!m) continue;
+    const valide = m.configurazione_json ? posizioni(JSON.parse(m.configurazione_json)) : [];
+    for (const w of v.ruote) {
+      let id;
+      try { id = normId(w && w.sensore_id); } catch (e) { esito.scartati.push(v.targa + ' ' + ((w && w.posizione) || '') + ': ID non valido'); continue; }
+      if (!valide.includes(w.posizione)) { esito.scartati.push(v.targa + ' ' + w.posizione + ': ruota non presente negli assi salvati'); continue; }
+      const k = m.id + '|' + w.posizione;
+      if (ruote.has(k)) {
+        if (ruote.get(k) === id) esito.id_uguali++;
+        else esito.id_diversi.push({ targa: v.targa, posizione: w.posizione, salvato: ruote.get(k), nel_file: id });
+        continue;
+      }
+      let prec = null; try { if (w.id_precedente) prec = normId(w.id_precedente); } catch (e) { /* si ignora */ }
+      sr.push(env.DB.prepare('INSERT OR IGNORE INTO ruote (mezzo_id, posizione, sensore_id, id_precedente, aggiornato, versione) VALUES (?, ?, ?, ?, ?, 1)')
+        .bind(m.id, w.posizione, id, prec, dataOk(w.aggiornato) || t));
+      ruote.set(k, id);
+      esito.id_nuovi++;
+    }
+  }
+  for (let i = 0; i < sr.length; i += 100) await env.DB.batch(sr.slice(i, i + 100));
+  esito.scartati = esito.scartati.slice(0, 50);
+  esito.id_diversi = esito.id_diversi.slice(0, 200);
+  return json(esito);
 }

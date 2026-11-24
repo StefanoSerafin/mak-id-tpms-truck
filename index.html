@@ -83,7 +83,12 @@ select{font:inherit;font-size:16px;padding:10px;border:1px solid #c5c9cf;border-
   <button class="btn big pri" type="button" data-nuova="trattore_motrice">Targa Trattore / Motrice<small>nuovo mezzo o aggiorna</small></button>
   <button class="btn big pri" type="button" data-nuova="rimorchio_semirimorchio">Targa Rimorchio / Semirimorchio<small>nuovo mezzo o aggiorna</small></button>
   <button class="btn big" type="button" id="bRecupera">Recupera targa<small>ritrova gli ID salvati</small></button>
-  <p class="small mute" style="text-align:center;margin-top:24px"><span id="nomeOff"></span> · <button class="btn link" type="button" id="bEsci">Esci</button></p>
+  <div class="riga" style="margin-top:20px">
+    <button class="btn" type="button" id="bEsporta">Esporta copia (CSV)</button>
+    <label class="btn" for="csvInput">Importa copia</label>
+  </div>
+  <input class="foto" type="file" id="csvInput" accept=".csv,text/csv,text/plain">
+  <p class="small mute" style="text-align:center;margin-top:16px"><span id="nomeOff"></span> · <button class="btn link" type="button" id="bEsci">Esci</button></p>
 </section>
 
 <section class="vista" id="v-targa">
@@ -631,6 +636,98 @@ async function salvaAssi() {
   S.fallimenti = 0; apriScheda(t, 'Configurazione salvata.');
 }
 
+// ---------- copia di sicurezza (CSV) ----------
+// Una riga per ruota (una riga senza posizione per i mezzi senza ID). Separatore ';' per Excel in italiano.
+// Gli ID sono scritti come ="0A1B2C" perché Excel non tolga gli zeri iniziali o li legga come numeri.
+const COLONNE = ['targa', 'tipo', 'assi', 'posizione', 'id_sensore', 'id_precedente', 'aggiornato', 'creato_mezzo'];
+const cellaCsv = v => { const s = String(v == null ? '' : v); return /[;"\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+const idCsv = v => v ? '="' + v + '"' : '';
+
+async function esportaCsv() {
+  if (coda().length) toast('Attenzione: ci sono modifiche non ancora inviate, non sono nella copia.');
+  let d;
+  try { d = await api('GET', '/esporta'); }
+  catch (e) { return chiedi(esc(inRete(e) ? 'Serve la rete per esportare la copia.' : e.message), [['OK', 0, 'pri']]); }
+  const righe = [COLONNE.join(';')];
+  let nId = 0;
+  for (const m of d.mezzi) {
+    const base = [m.targa, m.tipo, (m.configurazione || []).join('-')];
+    if (!m.ruote.length) righe.push([...base, '', '', '', m.aggiornato, m.creato].map(cellaCsv).join(';'));
+    for (const r of m.ruote) {
+      nId++;
+      righe.push([...base.map(cellaCsv), cellaCsv(r.posizione), idCsv(r.sensore_id), idCsv(r.id_precedente), cellaCsv(r.aggiornato), cellaCsv(m.creato)].join(';'));
+    }
+  }
+  const nome = 'id-tpms-copia-' + new Date().toISOString().slice(0, 10) + '.csv';
+  const file = new File(['﻿' + righe.join('\r\n') + '\r\n'], nome, { type: 'text/csv' });
+  try {
+    // su iPhone dall'icona della Home: foglio di condivisione («Salva su File», Mail, WhatsApp…)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nome }); }
+    else {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = nome;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    }
+    toast(`Copia pronta: ${d.mezzi.length} targhe, ${nId} ID.`);
+  } catch (e) { if (e.name !== 'AbortError') toast('Copia non salvata: ' + e.message); }
+}
+
+function leggiCsv(testo) {
+  testo = testo.replace(/^﻿/, '');
+  const prima = testo.split(/\r?\n/, 1)[0];
+  const sep = (prima.match(/;/g) || []).length >= (prima.match(/,/g) || []).length ? ';' : ',';
+  const righe = []; let riga = [], cella = '', q = false;
+  for (let i = 0; i < testo.length; i++) {
+    const c = testo[i];
+    if (q) { if (c === '"') { if (testo[i + 1] === '"') { cella += '"'; i++; } else q = false; } else cella += c; }
+    else if (c === '"') q = true;
+    else if (c === sep) { riga.push(cella); cella = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && testo[i + 1] === '\n') i++; riga.push(cella); righe.push(riga); riga = []; cella = ''; }
+    else cella += c;
+  }
+  if (cella || riga.length) { riga.push(cella); righe.push(riga); }
+  return righe.filter(r => r.some(x => x.trim()));
+}
+const pulisciCella = s => String(s || '').trim().replace(/^="?|"$/g, '').trim();
+
+async function importaCsv(ev) {
+  const f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+  if (!f) return;
+  let righe;
+  try { righe = leggiCsv(await f.text()); } catch (e) { return chiedi('File non leggibile.', [['OK', 0, 'pri']]); }
+  const intest = (righe.shift() || []).map(x => pulisciCella(x).toLowerCase());
+  const col = n => intest.indexOf(n);
+  if (col('targa') < 0 || col('tipo') < 0) return chiedi('Questo file non è una copia di ID TPMS TRUCK (mancano le colonne «targa» e «tipo»).', [['OK', 0, 'pri']]);
+  const tipoDa = s => { s = s.toLowerCase(); return s.startsWith('rim') || s.startsWith('semi') ? 'rimorchio_semirimorchio' : s.startsWith('tra') || s.startsWith('mot') ? 'trattore_motrice' : s; };
+  const mezzi = new Map(); let nId = 0;
+  for (const r of righe) {
+    const v = n => col(n) < 0 ? '' : pulisciCella(r[col(n)]);
+    const targa = normTarga(v('targa')); if (!targa) continue;
+    if (!mezzi.has(targa)) {
+      const assi = v('assi').split(/[^0-9]+/).filter(Boolean).map(Number);
+      mezzi.set(targa, { targa, tipo: tipoDa(v('tipo')), configurazione: assi.length ? assi : null, creato: v('creato_mezzo') || undefined, ruote: [] });
+    }
+    if (v('posizione') && v('id_sensore')) {
+      mezzi.get(targa).ruote.push({ posizione: v('posizione'), sensore_id: normId(v('id_sensore')), id_precedente: normId(v('id_precedente')) || null, aggiornato: v('aggiornato') || undefined });
+      nId++;
+    }
+  }
+  if (!mezzi.size) return chiedi('Nel file non ci sono targhe.', [['OK', 0, 'pri']]);
+  const ok = await chiedi(`Nel file: <b>${mezzi.size}</b> targhe e <b>${nId}</b> ID.<br><br>Si aggiunge solo quello che manca: gli ID già salvati <b>non vengono toccati</b>, quelli diversi vengono solo elencati.`,
+    [['Importa', true, 'pri'], ['Annulla', false]]);
+  if (!ok) return;
+  let e;
+  try { e = await api('POST', '/importa', { mezzi: [...mezzi.values()] }); }
+  catch (x) { return chiedi(esc(inRete(x) ? 'Serve la rete per importare.' : x.message), [['OK', 0, 'pri']]); }
+  // le schede salvate sul telefono si rileggono dal server (tranne quelle con modifiche in attesa)
+  const c = cache(); for (const t of mezzi.keys()) if (!codaPer(t)) delete c[t]; scrivi(K.cache, c);
+  let t = `Importazione fatta.<br><br>Targhe nuove: <b>${e.mezzi_nuovi}</b><br>ID aggiunti: <b>${e.id_nuovi}</b><br>ID già presenti uguali: ${e.id_uguali}`;
+  if (e.assi_impostati) t += `<br>Assi impostati su targhe esistenti: ${e.assi_impostati}`;
+  if (e.id_diversi.length) t += `<br><br><b>ID diversi, lasciati come erano (${e.id_diversi.length}):</b><br><span class="small">` +
+    e.id_diversi.slice(0, 30).map(d => `${esc(d.targa)} · ${esc(descrPos(d.posizione))}: salvato ${esc(d.salvato)}, nel file ${esc(d.nel_file)}`).join('<br>') + '</span>';
+  if (e.scartati.length) t += `<br><br><b>Righe scartate (${e.scartati.length}):</b><br><span class="small">` + e.scartati.slice(0, 20).map(esc).join('<br>') + '</span>';
+  await chiedi(t, [['OK', 0, 'pri']]);
+}
+
 // ---------- avvio ----------
 document.addEventListener('DOMContentLoaded', () => {
   $('loginForm').addEventListener('submit', accedi);
@@ -638,6 +735,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => mostra('home')));
   $('bRecupera').addEventListener('click', () => { $('rInput').value = ''; $('recEsito').innerHTML = ''; mostra('recupera'); setTimeout(() => $('rInput').focus(), 50); });
   $('bEsci').addEventListener('click', () => esci(false));
+  $('bEsporta').addEventListener('click', esportaCsv);
+  $('csvInput').addEventListener('change', importaCsv);
   $('tInput').addEventListener('input', () => ($('tAnteprima').textContent = normTarga($('tInput').value)));
   $('targaForm').addEventListener('submit', avantiTarga);
   $('recForm').addEventListener('submit', cercaTarga);
