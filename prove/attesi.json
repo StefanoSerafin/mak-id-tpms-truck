@@ -1,0 +1,13 @@
+{
+  "_nota": "Valori corretti delle foto di prova. Le foto stanno in prove/foto/ (fuori da git). Posizione: asse da sinistra (1 = cabina), lato sullo schermo (su/giu), est = ruota esterna, int = interna. Configurazione: ruote per asse. Pressione e temperatura servono solo a crea_modelli.py per avere campioni di altre cifre.",
+  "foto": {
+    "WhatsApp Image 2026-11-23 at 15.52.44.jpeg":     {"id": "5C307051", "asse": 1, "lato": "giu", "pos": "est", "configurazione": [2, 4, 2], "pressione": "133.4", "temperatura": "71"},
+    "WhatsApp Image 2026-11-23 at 15.52.45.jpeg":     {"id": "5C3838EC", "asse": 2, "lato": "su",  "pos": "est", "configurazione": [2, 4, 2], "pressione": "129.5", "temperatura": "82"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (1).jpeg": {"id": "5C35A04E", "asse": 2, "lato": "su",  "pos": "int", "configurazione": [2, 4, 2], "pressione": "120.7", "temperatura": "93"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (2).jpeg": {"id": "5C358F80", "asse": 2, "lato": "giu", "pos": "int", "configurazione": [2, 4, 2], "pressione": "130.2", "temperatura": "89"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (3).jpeg": {"id": "5C330B20", "asse": 2, "lato": "giu", "pos": "est", "configurazione": [2, 4, 2], "pressione": "133.4", "temperatura": "82"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (4).jpeg": {"id": "5C3030BA", "asse": 3, "lato": "giu", "pos": "est", "configurazione": [2, 4, 2], "pressione": "131.0", "temperatura": "89"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (5).jpeg": {"id": "5C302FCD", "asse": 3, "lato": "su",  "pos": "est", "configurazione": [2, 4, 2], "pressione": "131.0", "temperatura": "100"},
+    "WhatsApp Image 2026-11-23 at 15.52.45 (6).jpeg": {"id": "5C30387F", "asse": 1, "lato": "su",  "pos": "est", "configurazione": [2, 4, 2], "pressione": "135.0", "temperatura": "69"}
+  }
+}

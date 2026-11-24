@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ID TPMS">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>ID TPMS TRUCK</title>
+<style>
+:root{--ink:#14161a;--ink2:#3d424a;--mute:#6b7079;--line:#e2e4e8;--bg:#f3f4f6;--card:#fff;--brand:#da2128;--ok:#1a9e55;--okbg:#e3f5ea;--warn:#8a5d00;--warnbg:#fdf3d6;--err:#b42318;--errbg:#fde4e1;--vuota:#c9cdd3;--safeB:env(safe-area-inset-bottom)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+header.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:3px solid var(--brand);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px}
+header.top img{height:20px;display:block}
+header.top .tt{margin-left:auto;font-size:13px;font-weight:800;letter-spacing:.04em;text-align:right}
+main{max-width:640px;margin:0 auto;padding:14px 16px calc(40px + var(--safeB))}
+h1{font-size:22px;margin:6px 0 14px;line-height:1.2}
+h2{font-size:17px;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px}
+.mute{color:var(--mute)} .small{font-size:13px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:700;font-size:16px;text-align:center;cursor:pointer;-webkit-appearance:none;appearance:none;text-decoration:none}
+.btn.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.red{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.big{min-height:86px;font-size:19px;margin-bottom:12px;flex-direction:column;gap:2px}
+.btn.big small{font-weight:500;font-size:13px;opacity:.8}
+.btn.link{background:none;border:none;min-height:40px;color:var(--mute);font-weight:600;text-decoration:underline;width:auto;padding:6px 4px}
+.btn[disabled]{opacity:.45}
+.riga{display:flex;gap:10px} .riga>*{flex:1}
+label.f{display:block;margin:0 0 12px} label.f span{display:block;font-size:13px;color:var(--mute);font-weight:600;margin-bottom:4px}
+input.t{width:100%;font:inherit;font-size:18px;padding:12px;border:1px solid #c5c9cf;border-radius:10px;background:#fff;-webkit-appearance:none;appearance:none}
+input.targa,input.id{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:26px;letter-spacing:.08em;text-transform:uppercase;text-align:center;font-weight:700}
+select{font:inherit;font-size:16px;padding:10px;border:1px solid #c5c9cf;border-radius:10px;background:#fff;width:100%}
+.targaBig{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:34px;font-weight:800;letter-spacing:.08em;text-align:center;padding:8px;border:3px solid var(--ink);border-radius:8px;background:#fff;margin:6px 0 12px;min-height:60px}
+.tipo{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--ink2);border-radius:6px;padding:3px 8px}
+.avviso{border-radius:10px;padding:10px 12px;margin:0 0 12px;font-size:15px}
+.avviso.w{background:var(--warnbg);color:var(--warn)} .avviso.e{background:var(--errbg);color:var(--err)} .avviso.o{background:var(--okbg);color:#146c3c}
+.schema{width:100%;height:auto;display:block;touch-action:manipulation}
+.schema .ru{cursor:pointer}
+.idBig{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:30px;font-weight:800;letter-spacing:.1em;text-align:center;margin:4px 0}
+.chips{display:flex;justify-content:center;gap:4px;margin:6px 0 10px;flex-wrap:wrap}
+.chips b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:26px;width:30px;text-align:center;border-radius:6px;padding:2px 0;background:#eef0f2}
+.chips b.inc{background:var(--warnbg);color:var(--warn);outline:2px solid #e8a500}
+.stato{font-size:13px;text-align:center;margin:-4px 0 12px}
+.lista button{margin-bottom:8px}
+.ax{display:flex;align-items:center;gap:10px;margin:0 0 8px}
+.ax b{width:64px} .ax label{flex:1;display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.ax input{width:20px;height:20px}
+#modale{position:fixed;inset:0;background:rgba(20,22,26,.55);z-index:50;display:none;align-items:flex-end;justify-content:center;padding:16px}
+#modale.on{display:flex}
+#modale .box{background:#fff;border-radius:14px;max-width:520px;width:100%;padding:18px;margin-bottom:var(--safeB)}
+#modale .box p{margin:0 0 14px}
+#toast{position:fixed;left:50%;bottom:calc(20px + var(--safeB));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;display:none;max-width:90%}
+.attesa{display:none;text-align:center;padding:30px 0;font-weight:700}
+.vista{display:none} .vista.on{display:block}
+.foto{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+</style>
+</head>
+<body>
+<header class="top"><img src="logo-mate-nero.svg" alt="MATE"><div class="tt">ID TPMS<br>TRUCK</div></header>
+<main>
+
+<section class="vista" id="v-login">
+  <h1>Accedi</h1>
+  <p class="mute small">Utenza dell'officina, attivata dal tuo agente MAK. La stessa mail e password valgono su tutti i telefoni del reparto.</p>
+  <div id="loginMsg"></div>
+  <form id="loginForm" class="card" autocomplete="on">
+    <label class="f"><span>Mail aziendale</span><input class="t" id="lEmail" type="email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required></label>
+    <label class="f"><span>Password</span><input class="t" id="lPwd" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required></label>
+    <button class="btn pri" type="submit">Accedi</button>
+  </form>
+</section>
+
+<section class="vista" id="v-home">
+  <div id="homeStato"></div>
+  <button class="btn big pri" type="button" data-nuova="trattore_motrice">Targa Trattore / Motrice<small>nuovo mezzo o aggiorna</small></button>
+  <button class="btn big pri" type="button" data-nuova="rimorchio_semirimorchio">Targa Rimorchio / Semirimorchio<small>nuovo mezzo o aggiorna</small></button>
+  <button class="btn big" type="button" id="bRecupera">Recupera targa<small>ritrova gli ID salvati</small></button>
+  <p class="small mute" style="text-align:center;margin-top:24px"><span id="nomeOff"></span> · <button class="btn link" type="button" id="bEsci">Esci</button></p>
+</section>
+
+<section class="vista" id="v-targa">
+  <button class="btn link" type="button" data-home>← Home</button>
+  <h1 id="targaTitolo"></h1>
+  <div id="targaMsg"></div>
+  <form id="targaForm" class="card">
+    <label class="f"><span>Scrivi la targa</span><input class="t targa" id="tInput" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="14" required></label>
+    <div class="targaBig" id="tAnteprima"></div>
+    <button class="btn pri" type="submit">Avanti</button>
+  </form>
+</section>
+
+<section class="vista" id="v-recupera">
+  <button class="btn link" type="button" data-home>← Home</button>
+  <h1>Recupera targa</h1>
+  <form id="recForm" class="card">
+    <label class="f"><span>Scrivi la targa</span><input class="t targa" id="rInput" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="14" required></label>
+    <button class="btn pri" type="submit">Cerca</button>
+  </form>
+  <div id="recEsito"></div>
+</section>
+
+<section class="vista" id="v-scheda">
+  <button class="btn link" type="button" data-home>← Home</button>
+  <div style="display:flex;align-items:center;gap:8px;justify-content:space-between"><span class="tipo" id="sTipo"></span><span class="small mute" id="sAgg"></span></div>
+  <div class="targaBig" id="sTarga"></div>
+  <div id="sAvvisi"></div>
+  <div id="sCorpo"></div>
+  <p style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:20px">
+    <button class="btn link" type="button" id="bCorreggiTarga">Correggi targa</button>
+    <button class="btn link" type="button" id="bAssiMano">Assi a mano</button>
+    <button class="btn link" type="button" id="bElimina">Elimina mezzo</button>
+  </p>
+</section>
+
+<section class="vista" id="v-conferma">
+  <h1>Controlla e conferma</h1>
+  <div id="cAvvisi"></div>
+  <div class="card">
+    <div class="small mute">Ruota (tocca lo schema per cambiarla)</div>
+    <div id="cSchema"></div>
+    <div id="cRuota" style="text-align:center;font-weight:700;margin-top:6px"></div>
+  </div>
+  <div class="card">
+    <div class="small mute" id="cIdTitolo">ID del sensore</div>
+    <div class="chips" id="cChips"></div>
+    <input class="t id" id="cId" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="12" inputmode="text">
+    <div class="small mute" style="text-align:center;margin-top:6px">Solo cifre 0-9 e lettere A-F</div>
+  </div>
+  <div id="cSovr"></div>
+  <button class="btn pri" type="button" id="cOk">Conferma e salva</button>
+  <div class="riga" style="margin-top:10px"><label class="btn" for="fotoInput">Rifai foto</label><button class="btn" type="button" id="cAnnulla">Annulla</button></div>
+</section>
+
+<section class="vista" id="v-assi">
+  <h1>Assi a mano</h1>
+  <p class="small mute">Da usare solo se la foto del VT Truck non viene riconosciuta. L'asse 1 è quello più vicino alla cabina o al timone.</p>
+  <div class="card">
+    <label class="f"><span>Numero di assi</span><select id="aNum"></select></label>
+    <div id="aAssi"></div>
+  </div>
+  <div class="card" id="aAnteprima"></div>
+  <button class="btn pri" type="button" id="aOk">Salva configurazione</button>
+  <button class="btn" type="button" id="aAnnulla" style="margin-top:10px">Annulla</button>
+</section>
+
+<div class="attesa" id="attesa">Lettura della foto…</div>
+<input class="foto" type="file" accept="image/*" capture="environment" id="fotoInput">
+</main>
+<div id="modale"><div class="box"><p id="mTesto"></p><div id="mBottoni"></div></div></div>
+<div id="toast"></div>
+
+<script src="modelli.js"></script>
+<script src="lettore.js"></script>
+<script>
+'use strict';
+const API = 'https://mak-id-tpms-truck.serafin-stefano72.workers.dev';
+const K = { token: 'idtpms.token', off: 'idtpms.officina', cache: 'idtpms.cache', coda: 'idtpms.coda', conf: 'idtpms.conflitti' };
+const TIPI = { trattore_motrice: 'Trattore / Motrice', rimorchio_semirimorchio: 'Rimorchio / Semirimorchio' };
+const $ = id => document.getElementById(id);
+const leggi = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const scrivi = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const normTarga = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const normId = s => String(s || '').toUpperCase().replace(/[^0-9A-F]/g, '');
+const data = iso => iso ? new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+
+const S = { vista: 'login', tipoNuovo: null, targa: null, sel: null, lettura: null, fallimenti: 0, fotoPer: null, invioInCorso: false };
+
+// ---------- interfaccia di base ----------
+function mostra(v) {
+  document.querySelectorAll('.vista').forEach(x => x.classList.toggle('on', x.id === 'v-' + v));
+  S.vista = v; window.scrollTo(0, 0);
+  if (v === 'home') aggiornaHome();
+}
+function avviso(dove, testo, tipo = 'w') { $(dove).innerHTML = testo ? `<div class="avviso ${tipo}">${testo}</div>` : ''; }
+let tToast;
+function toast(t) { const e = $('toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(tToast); tToast = setTimeout(() => (e.style.display = 'none'), 2600); }
+function chiedi(testo, bottoni) {
+  return new Promise(ok => {
+    $('mTesto').innerHTML = testo;
+    const b = $('mBottoni'); b.innerHTML = '';
+    bottoni.forEach(([etichetta, valore, classe], i) => {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'btn ' + (classe || ''); x.textContent = etichetta;
+      if (i) x.style.marginTop = '10px';
+      x.addEventListener('click', () => { $('modale').classList.remove('on'); ok(valore); });
+      b.appendChild(x);
+    });
+    $('modale').classList.add('on');
+  });
+}
+function descrPos(p) {
+  const m = /^A(\d+)-(su|giu)-(est|int)$/.exec(p || ''); if (!m) return '';
+  return `Asse ${m[1]}, lato ${m[2] === 'su' ? 'alto' : 'basso'}, ${m[3] === 'int' ? 'interna' : 'esterna'}`;
+}
+function posizioni(c) {
+  const o = []; (c || []).forEach((n, i) => { const a = 'A' + (i + 1); o.push(a + '-su-est'); if (n === 4) o.push(a + '-su-int', a + '-giu-int'); o.push(a + '-giu-est'); }); return o;
+}
+
+// ---------- rete e coda ----------
+async function api(metodo, percorso, corpo) {
+  const tok = leggi(K.token, null);
+  const r = await fetch(API + percorso, {
+    method: metodo,
+    headers: { 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) },
+    body: corpo === undefined ? undefined : JSON.stringify(corpo),
+  });
+  let b = {}; try { b = await r.json(); } catch (e) { /* vuoto */ }
+  if (r.status === 401 && percorso !== '/login') { esci(true); throw Object.assign(new Error(b.errore || 'Accesso scaduto'), { stato: 401, corpo: b }); }
+  if (!r.ok) throw Object.assign(new Error(b.errore || 'Errore ' + r.status), { stato: r.status, corpo: b });
+  return b;
+}
+const inRete = e => !e.stato;   // errore di rete: nessuno stato HTTP
+
+const cache = () => leggi(K.cache, {});
+function salvaScheda(s) { const c = cache(); c[s.mezzo.targa] = s; scrivi(K.cache, c); }
+function scheda(t) { return cache()[t] || null; }
+const coda = () => leggi(K.coda, []);
+const codaPer = t => coda().filter(o => o.targa === t).length;
+function accoda(op) { const c = coda(); c.push({ ...op, n: Date.now() + Math.random() }); scrivi(K.coda, c); invia(); }
+
+async function invia() {
+  if (S.invioInCorso) return; S.invioInCorso = true;
+  try {
+    for (;;) {
+      const c = coda(); if (!c.length) break;
+      const op = c[0];
+      try {
+        const r = await api(op.metodo, op.percorso, op.corpo);
+        togli(op.n);
+        if (r && r.mezzo && !codaPer(op.targa)) salvaScheda(r);
+      } catch (e) {
+        if (inRete(e)) break;                     // niente rete: riprova più tardi
+        togli(op.n);
+        if (e.stato === 401) break;
+        if (e.stato === 409 && op.tipo === 'ruota') {
+          const cf = leggi(K.conf, []); cf.push({ targa: op.targa, pos: op.pos, mio: op.corpo.sensore_id, attuale: e.corpo.attuale }); scrivi(K.conf, cf);
+          try { salvaScheda(await api('GET', '/mezzi/' + op.targa)); } catch (x) { /* più tardi */ }
+        } else toast('Non salvato: ' + e.message);
+      }
+    }
+  } finally {
+    S.invioInCorso = false;
+    if (S.vista === 'scheda') disegnaScheda(); else if (S.vista === 'home') aggiornaHome();
+  }
+}
+function togli(n) { scrivi(K.coda, coda().filter(o => o.n !== n)); }
+setInterval(() => { if (coda().length) invia(); }, 30000);
+
+// ---------- accesso ----------
+async function accedi(ev) {
+  ev.preventDefault();
+  avviso('loginMsg', '');
+  try {
+    const r = await api('POST', '/login', { email: $('lEmail').value.trim(), password: $('lPwd').value });
+    // un'altra officina sullo stesso telefono: niente dati della precedente
+    if (leggi(K.off, null) !== r.officina.nome) [K.cache, K.coda, K.conf].forEach(k => localStorage.removeItem(k));
+    scrivi(K.token, r.token); scrivi(K.off, r.officina.nome); $('lPwd').value = '';
+    mostra('home'); invia();
+  } catch (e) { avviso('loginMsg', esc(inRete(e) ? 'Nessuna connessione: per il primo accesso serve la rete.' : e.message), 'e'); }
+}
+async function esci(scaduta) {
+  if (!scaduta) {
+    if (coda().length && !(await chiedi('Ci sono letture non ancora inviate. Se esci le perdi. Uscire lo stesso?', [['Resta', false, 'pri'], ['Esci e perdi le letture', true]]))) return;
+    try { await api('POST', '/logout'); } catch (e) { /* comunque */ }
+  }
+  // accesso scaduto: si tiene la coda, che parte dopo il nuovo accesso della stessa officina
+  if (scaduta) localStorage.removeItem(K.token); else Object.values(K).forEach(k => localStorage.removeItem(k));
+  mostra('login');
+  if (scaduta) avviso('loginMsg', 'Accesso scaduto o utenza sospesa: accedi di nuovo.', 'w');
+}
+
+// ---------- home ----------
+function aggiornaHome() {
+  $('nomeOff').textContent = leggi(K.off, '');
+  const n = coda().length;
+  avviso('homeStato', n ? `${n} ${n === 1 ? 'modifica in attesa' : 'modifiche in attesa'} di rete: partono da sole appena c'è connessione.` : '', 'w');
+}
+
+// ---------- nuova targa ----------
+function apriNuova(tipo) {
+  S.tipoNuovo = tipo;
+  $('targaTitolo').textContent = 'Targa ' + TIPI[tipo];
+  $('tInput').value = ''; $('tAnteprima').textContent = ''; avviso('targaMsg', '');
+  mostra('targa'); setTimeout(() => $('tInput').focus(), 50);
+}
+async function avantiTarga(ev) {
+  ev.preventDefault();
+  const t = normTarga($('tInput').value);
+  if (t.length < 4 || t.length > 10) return avviso('targaMsg', 'La targa deve avere da 4 a 10 lettere o cifre.', 'e');
+  const tipo = S.tipoNuovo;
+  try {
+    const r = await api('GET', '/mezzi/' + t);
+    salvaScheda(r);
+    return apriScheda(t, r.mezzo.tipo !== tipo ? `Questa targa era già registrata come <b>${esc(TIPI[r.mezzo.tipo])}</b>.` : 'Targa già registrata: ecco la scheda.');
+  } catch (e) {
+    if (inRete(e)) {
+      if (scheda(t)) return apriScheda(t);
+      creaLocale(t, tipo); return apriScheda(t, 'Nessuna connessione: il mezzo è salvato sul telefono e verrà inviato appena c\'è rete.');
+    }
+    if (e.stato !== 404) return avviso('targaMsg', esc(e.message), 'e');
+    const sim = (e.corpo && e.corpo.simili) || [];
+    if (sim.length) {
+      const scelta = await chiedi(`Esiste già <b>${sim.map(x => esc(x.targa)).join(', ')}</b>, diversa di un solo carattere da <b>${esc(t)}</b>. È lo stesso mezzo?`,
+        [...sim.map(x => ['Sì, apri ' + x.targa, x.targa, 'pri']), ['No, crea ' + t, '__nuova'], ['Correggo la targa', null]]);
+      if (scelta === null) return;
+      if (scelta !== '__nuova') return apriTarga(scelta);
+    }
+    try { const r = await api('POST', '/mezzi', { targa: t, tipo }); salvaScheda(r); apriScheda(t); }
+    catch (x) {
+      if (inRete(x)) { creaLocale(t, tipo); return apriScheda(t, 'Nessuna connessione: il mezzo è salvato sul telefono e verrà inviato appena c\'è rete.'); }
+      avviso('targaMsg', esc(x.message), 'e');
+    }
+  }
+}
+function creaLocale(t, tipo) {
+  const ora = new Date().toISOString();
+  salvaScheda({ mezzo: { targa: t, tipo, configurazione: null, creato: ora, aggiornato: ora }, ruote: [] });
+  accoda({ tipo: 'crea', targa: t, metodo: 'POST', percorso: '/mezzi', corpo: { targa: t, tipo } });
+}
+
+// ---------- recupera ----------
+async function cercaTarga(ev) {
+  ev.preventDefault();
+  const t = normTarga($('rInput').value);
+  if (t.length < 4) return avviso('recEsito', 'Scrivi almeno 4 lettere o cifre.', 'e');
+  avviso('recEsito', '');
+  apriTarga(t, true);
+}
+async function apriTarga(t, daRecupera) {
+  try {
+    const r = await api('GET', '/mezzi/' + t);
+    if (!codaPer(t)) salvaScheda(r);
+    apriScheda(t);
+  } catch (e) {
+    if (inRete(e)) {
+      if (scheda(t)) return apriScheda(t, 'Nessuna connessione: vedi l\'ultima copia salvata su questo telefono.');
+      return avviso(daRecupera ? 'recEsito' : 'targaMsg', 'Nessuna connessione e targa non presente su questo telefono.', 'e');
+    }
+    if (e.stato !== 404) return avviso('recEsito', esc(e.message), 'e');
+    if (!daRecupera) return;
+    const sim = (e.corpo && e.corpo.simili) || [];
+    const el = $('recEsito');
+    el.innerHTML = `<div class="avviso e">Targa <b>${esc(t)}</b> non trovata.</div>` +
+      (sim.length ? `<p class="small mute">Forse cercavi:</p><div class="lista">${sim.map(x => `<button class="btn" type="button" data-apri="${esc(x.targa)}">${esc(x.targa)} · ${esc(TIPI[x.tipo])}</button>`).join('')}</div>` : '') +
+      `<p class="small mute">Oppure registrala ora:</p><div class="lista"><button class="btn" type="button" data-crea="trattore_motrice" data-t="${esc(t)}">Crea come Trattore / Motrice</button><button class="btn" type="button" data-crea="rimorchio_semirimorchio" data-t="${esc(t)}">Crea come Rimorchio / Semirimorchio</button></div>`;
+  }
+}
+
+// ---------- schema SVG ----------
+// config: [2,4,2]; ruote: {pos: id}; opzioni: {sel, proposta, tipo, clic}
+function svgSchema(config, ruote, o = {}) {
+  const n = config.length, X0 = 92, DX = 62, W = X0 + n * DX + 30, H = 168;
+  const parti = [`<svg class="schema" viewBox="0 0 ${W} ${H}" role="img" aria-label="Schema assi">`];
+  parti.push(`<rect x="${X0 - 24}" y="44" width="${W - X0 + 10}" height="62" rx="6" fill="#eef0f2" stroke="#d5d8dd"/>`);
+  if (o.tipo === 'rimorchio_semirimorchio') parti.push(`<path d="M${X0 - 24} 75 L14 75" stroke="#9aa0a8" stroke-width="5" stroke-linecap="round"/><circle cx="14" cy="75" r="7" fill="#9aa0a8"/>`);
+  else parti.push(`<path d="M${X0 - 30} 32 L30 32 Q12 32 12 52 L12 98 Q12 118 30 118 L${X0 - 30} 118 Z" fill="#dfe2e6" stroke="#9aa0a8" stroke-width="2"/><rect x="20" y="46" width="10" height="58" rx="3" fill="#b9c3cc"/>`);
+  config.forEach((k, i) => {
+    const x = X0 + i * DX, a = 'A' + (i + 1);
+    parti.push(`<line x1="${x}" y1="22" x2="${x}" y2="128" stroke="#9aa0a8" stroke-width="4"/>`);
+    parti.push(`<text x="${x}" y="162" text-anchor="middle" font-size="11" fill="#6b7079" font-weight="700">${i + 1}</text>`);
+    const posti = k === 4 ? [['su-est', 6], ['su-int', 30], ['giu-int', 100], ['giu-est', 124]] : [['su-est', 6], ['giu-est', 124]];
+    posti.forEach(([p, y]) => {
+      const pos = a + '-' + p, id = ruote[pos], sel = o.sel === pos, prop = o.proposta === pos;
+      const fill = id ? '#1a9e55' : '#c9cdd3';
+      const stroke = sel ? '#da2128' : prop ? '#e8a500' : '#fff';
+      parti.push(`<g class="ru" data-pos="${pos}"><rect x="${x - 24}" y="${y - 6}" width="48" height="32" fill="transparent"/>` +
+        `<rect x="${x - 19}" y="${y}" width="38" height="20" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="${sel || prop ? 4 : 2}"/></g>`);
+    });
+  });
+  parti.push('</svg>');
+  return parti.join('');
+}
+function collegaSchema(contenitore, clic) {
+  contenitore.querySelectorAll('.ru').forEach(g => g.addEventListener('click', () => clic(g.dataset.pos)));
+}
+
+// ---------- scheda mezzo ----------
+function apriScheda(t, messaggio) {
+  S.targa = t; S.sel = null; S.fallimenti = 0; S.fotoPer = null;
+  S.messaggio = messaggio || '';
+  mostra('scheda'); disegnaScheda();
+}
+function mappaRuote(s) { const m = {}; (s.ruote || []).forEach(r => (m[r.posizione] = r.sensore_id)); return m; }
+function disegnaScheda() {
+  const s = scheda(S.targa); if (!s) return mostra('home');
+  const m = s.mezzo, rm = mappaRuote(s);
+  $('sTipo').textContent = TIPI[m.tipo]; $('sTarga').textContent = m.targa;
+  $('sAgg').textContent = m.aggiornato ? 'agg. ' + data(m.aggiornato) : '';
+  const av = [];
+  if (S.messaggio) av.push(`<div class="avviso w">${S.messaggio}</div>`);
+  const n = codaPer(m.targa);
+  if (n) av.push(`<div class="avviso w">${n} ${n === 1 ? 'modifica' : 'modifiche'} in attesa di rete.</div>`);
+  leggi(K.conf, []).forEach((c, i) => {
+    if (c.targa !== m.targa) return;
+    av.push(`<div class="avviso e"><b>${esc(descrPos(c.pos))}</b>: tu hai letto <b>${esc(c.mio)}</b>, intanto un altro dispositivo ha salvato <b>${esc(c.attuale ? c.attuale.sensore_id : 'nessun ID')}</b>.
+      <div class="riga" style="margin-top:8px"><button class="btn" type="button" data-conf="${i}" data-scelta="mio">Tieni ${esc(c.mio)}</button><button class="btn" type="button" data-conf="${i}" data-scelta="altro">Tieni l'altro</button></div></div>`);
+  });
+  $('sAvvisi').innerHTML = av.join('');
+  let h = '';
+  if (!m.configurazione) {
+    h += `<div class="card"><p style="margin-top:0"><b>Fotografa la prima schermata del VT Truck.</b> Lo schema degli assi si crea da solo dalla foto.</p>
+      <label class="btn red big" for="fotoInput" data-fotoper="">📷 Fotografa la schermata</label>
+      ${S.fallimenti >= 2 ? '<div class="avviso w">La foto non è stata riconosciuta due volte. Puoi impostare gli assi a mano.</div><button class="btn" type="button" id="bAssiMano2">Imposta gli assi a mano</button>' : ''}</div>`;
+  } else {
+    const tot = posizioni(m.configurazione).length, fatte = posizioni(m.configurazione).filter(p => rm[p]).length;
+    h += `<div class="card">${svgSchema(m.configurazione, rm, { sel: S.sel, tipo: m.tipo })}
+      <div class="stato mute">${fatte} di ${tot} ruote con ID · configurazione ${m.configurazione.join('-')}</div>
+      <label class="btn red big" for="fotoInput" data-fotoper="">📷 Leggi dal VT Truck</label></div>`;
+    if (S.sel) {
+      const r = (s.ruote || []).find(x => x.posizione === S.sel);
+      h += `<div class="card"><div style="font-weight:700">${esc(descrPos(S.sel))}</div>
+        ${r ? `<div class="idBig">${esc(r.sensore_id)}</div><div class="small mute" style="text-align:center">salvato il ${esc(data(r.aggiornato))}${r.id_precedente ? ' · prima era ' + esc(r.id_precedente) : ''}</div>
+        <button class="btn" type="button" id="bCopia" style="margin-top:10px">Copia ID</button>` : '<p class="mute">Nessun ID salvato per questa ruota.</p>'}
+        <div class="riga" style="margin-top:10px"><label class="btn" for="fotoInput" data-fotoper="${S.sel}">📷 Foto di questa ruota</label><button class="btn" type="button" id="bMano">Scrivi ID a mano</button></div>
+        ${r ? '<button class="btn link" type="button" id="bCancRuota">Cancella questo ID</button>' : ''}</div>`;
+    } else h += '<p class="small mute" style="text-align:center">Tocca una ruota per vedere l\'ID, copiarlo o scriverlo a mano.</p>';
+  }
+  $('sCorpo').innerHTML = h;
+  const c = $('sCorpo').querySelector('.schema');
+  if (c) collegaSchema($('sCorpo'), p => { S.sel = S.sel === p ? null : p; S.messaggio = ''; disegnaScheda(); });
+  $('sCorpo').querySelectorAll('[data-fotoper]').forEach(l => l.addEventListener('click', () => { S.fotoPer = l.dataset.fotoper || null; }));
+  if ($('bCopia')) $('bCopia').addEventListener('click', () => {
+    const r = (s.ruote || []).find(x => x.posizione === S.sel);
+    if (navigator.clipboard) navigator.clipboard.writeText(r.sensore_id).then(() => toast('ID copiato'), () => toast(r.sensore_id));
+  });
+  if ($('bMano')) $('bMano').addEventListener('click', () => apriConferma({ manuale: true, pos: S.sel }));
+  if ($('bCancRuota')) $('bCancRuota').addEventListener('click', cancellaRuota);
+  if ($('bAssiMano2')) $('bAssiMano2').addEventListener('click', apriAssi);
+  $('bAssiMano').style.display = m.configurazione || S.fallimenti >= 2 ? '' : 'none';
+}
+
+async function risolviConflitto(i, scelta) {
+  const cf = leggi(K.conf, []), c = cf[i]; if (!c) return;
+  cf.splice(i, 1); scrivi(K.conf, cf);
+  if (scelta === 'mio') {
+    const s = scheda(c.targa), r = s && (s.ruote || []).find(x => x.posizione === c.pos);
+    accoda({ tipo: 'ruota', targa: c.targa, pos: c.pos, metodo: 'PUT', percorso: `/mezzi/${c.targa}/ruote/${c.pos}`, corpo: { sensore_id: c.mio, versione: r ? r.versione : 0 } });
+    aggiornaLocale(c.targa, c.pos, c.mio);
+  }
+  disegnaScheda();
+}
+
+async function cancellaRuota() {
+  const s = scheda(S.targa), r = (s.ruote || []).find(x => x.posizione === S.sel);
+  if (!r) return;
+  if (!(await chiedi(`Cancellare l'ID <b>${esc(r.sensore_id)}</b> da ${esc(descrPos(S.sel))}?`, [['Cancella', true, 'red'], ['Annulla', false]]))) return;
+  try { salvaScheda(await api('DELETE', `/mezzi/${S.targa}/ruote/${S.sel}`, { versione: r.versione })); disegnaScheda(); }
+  catch (e) { toast(inRete(e) ? 'Serve la connessione per cancellare.' : e.message); }
+}
+
+async function correggiTarga() {
+  const t0 = S.targa;
+  const nuova = normTarga(await chiediTesto(`Nuova targa al posto di <b>${esc(t0)}</b>:`, t0));
+  if (!nuova || nuova === t0) return;
+  if (nuova.length < 4 || nuova.length > 10) return toast('Targa non valida.');
+  if (codaPer(t0)) return toast('Aspetta che le modifiche in attesa siano inviate.');
+  try {
+    const r = await api('PATCH', '/mezzi/' + t0, { nuova_targa: nuova });
+    const c = cache(); delete c[t0]; scrivi(K.cache, c); salvaScheda(r); apriScheda(nuova, 'Targa corretta.');
+  } catch (e) { toast(inRete(e) ? 'Serve la connessione per correggere la targa.' : e.message); }
+}
+function chiediTesto(testo, valore) {
+  return new Promise(ok => {
+    $('mTesto').innerHTML = testo + '<input class="t targa" id="mInput" style="margin-top:10px" autocapitalize="characters" autocorrect="off" spellcheck="false">';
+    $('mInput').value = valore || '';
+    const b = $('mBottoni'); b.innerHTML = '';
+    [['Salva', true, 'pri'], ['Annulla', false, '']].forEach(([e, v, cl], i) => {
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'btn ' + cl; x.textContent = e; if (i) x.style.marginTop = '10px';
+      x.addEventListener('click', () => { const val = $('mInput').value; $('modale').classList.remove('on'); ok(v ? val : null); });
+      b.appendChild(x);
+    });
+    $('modale').classList.add('on');
+  });
+}
+async function eliminaMezzo() {
+  const t = S.targa;
+  if (!(await chiedi(`Eliminare il mezzo <b>${esc(t)}</b> con tutti i suoi ID? Non si può annullare.`, [['Elimina', true, 'red'], ['Annulla', false]]))) return;
+  try {
+    await api('DELETE', '/mezzi/' + t);
+    const c = cache(); delete c[t]; scrivi(K.cache, c);
+    scrivi(K.coda, coda().filter(o => o.targa !== t));
+    toast('Mezzo eliminato'); mostra('home');
+  } catch (e) { toast(inRete(e) ? 'Serve la connessione per eliminare.' : e.message); }
+}
+
+// ---------- foto e lettura ----------
+async function fotoScelta() {
+  const f = $('fotoInput').files[0]; $('fotoInput').value = '';
+  if (!f || !S.targa) return;
+  const s = scheda(S.targa); if (!s) return;
+  const prima = S.vista;
+  document.querySelectorAll('.vista').forEach(x => x.classList.remove('on'));
+  $('attesa').style.display = 'block';
+  let ris = null;
+  try {
+    const img = await window.Lettore.leggiFile(f);
+    await new Promise(r => setTimeout(r, 30));
+    ris = window.Lettore.analizza(img, window.MODELLI);
+  } catch (e) { ris = { esito: 'errore', id: null, caratteri: [], configurazione: null, gruppi: null, ruota: null }; }
+  $('attesa').style.display = 'none';
+  const m = s.mezzo;
+  // gruppo di assi che riguarda questo mezzo, in base al tasto scelto
+  let confFoto = null, gi = 0;
+  if (ris.gruppi && ris.gruppi.length) {
+    gi = ris.gruppi.length === 2 && m.tipo === 'rimorchio_semirimorchio' ? 1 : 0;
+    confFoto = ris.gruppi[gi];
+  }
+  if (!m.configurazione && !confFoto) {
+    S.fallimenti++;
+    S.messaggio = S.fallimenti >= 2 ? 'Schema non riconosciuto di nuovo.' : 'Schema non riconosciuto: rifai la foto con tutto il display inquadrato, dritto e senza riflessi.';
+    if (prima === 'conferma') mostra('conferma'); else { mostra('scheda'); disegnaScheda(); }
+    return;
+  }
+  const lettura = { ris, confFoto, gi, nuovaConf: null, avvisi: [] };
+  if (!m.configurazione) lettura.nuovaConf = confFoto;
+  else if (confFoto && confFoto.join('-') !== m.configurazione.join('-')) {
+    lettura.avvisi.push(`La foto mostra gli assi <b>${confFoto.join('-')}</b>, ma il mezzo è salvato come <b>${m.configurazione.join('-')}</b>. Controlla di aver fotografato il mezzo giusto.`);
+    lettura.diversa = confFoto;
+  }
+  const conf = lettura.nuovaConf || m.configurazione;
+  if (!confFoto) lettura.avvisi.push('Non trovo lo schema del VT Truck nella foto: tocca la ruota sullo schema.');
+  let pos = null;
+  if (ris.ruota && confFoto && confFoto.join('-') === conf.join('-')) {
+    if (ris.ruota.gruppo === gi) pos = ris.ruota.chiave;
+    else lettura.avvisi.push(`La ruota evidenziata sul VT Truck appartiene al ${m.tipo === 'trattore_motrice' ? 'rimorchio' : 'trattore'}, non a questo mezzo. Scegli la ruota a mano se sei sicuro.`);
+  } else if (ris.ruota === null && confFoto) lettura.avvisi.push('Non trovo la ruota evidenziata in rosso: toccala sullo schema.');
+  if (S.fotoPer && pos && pos !== S.fotoPer) lettura.avvisi.push(`Avevi scelto ${esc(descrPos(S.fotoPer))}, ma la foto indica ${esc(descrPos(pos))}.`);
+  if (!pos && S.fotoPer) pos = S.fotoPer;
+  apriConferma({ manuale: false, pos, lettura, conf });
+}
+
+function apriConferma(o) {
+  const s = scheda(S.targa), m = s.mezzo;
+  S.lettura = { ...o, conf: o.conf || m.configurazione, nuovaConf: o.lettura ? o.lettura.nuovaConf : null };
+  if (!S.lettura.conf) return;
+  const L = o.lettura, av = L ? [...L.avvisi] : [];
+  if (L && L.nuovaConf) av.unshift(`Schema ricavato dalla foto: assi <b>${L.nuovaConf.join('-')}</b>. Se non corrisponde al mezzo, annulla e rifai la foto.`);
+  if (L && !L.ris.id) {
+    const motivo = L.ris.esito === 'senza_modelli' ? 'La lettura automatica degli ID non è ancora attiva.' : 'ID non letto dalla foto.';
+    av.push(`${motivo} Scrivilo a mano copiandolo dal VT Truck.`);
+  }
+  $('cAvvisi').innerHTML = av.map(t => `<div class="avviso w">${t}</div>`).join('');
+  $('cId').value = L && L.ris.id ? L.ris.id : '';
+  $('cIdTitolo').textContent = o.manuale ? 'Scrivi l\'ID del sensore' : 'ID letto dalla foto: controllalo';
+  disegnaChips(L && L.ris.id ? L.ris.caratteri : null);
+  S.lettura.pos = o.pos || null;
+  disegnaConferma();
+  mostra('conferma');
+  if (!$('cId').value) setTimeout(() => $('cId').focus(), 50);
+}
+function disegnaChips(car) {
+  $('cChips').innerHTML = car ? car.map(c => `<b class="${c.incerto ? 'inc' : ''}">${esc(c.c)}</b>`).join('') + (car.some(c => c.incerto) ? '<div class="small" style="width:100%;text-align:center;color:#8a5d00">In giallo i caratteri incerti: confrontali con il display.</div>' : '') : '';
+}
+function disegnaConferma() {
+  const L = S.lettura, s = scheda(S.targa), rm = mappaRuote(s);
+  const ruoteView = L.nuovaConf ? {} : rm;
+  $('cSchema').innerHTML = svgSchema(L.conf, ruoteView, { sel: L.pos, tipo: s.mezzo.tipo });
+  collegaSchema($('cSchema'), p => { L.pos = p; disegnaConferma(); });
+  $('cRuota').textContent = L.pos ? descrPos(L.pos) : 'Tocca la ruota sullo schema';
+  const id = normId($('cId').value), sov = [];
+  if (L.pos && rm[L.pos] && !L.nuovaConf && id && rm[L.pos] !== id) sov.push(`Questa ruota aveva già l'ID <b>${esc(rm[L.pos])}</b>: verrà sostituito da <b>${esc(id)}</b>. Il vecchio resta visibile come «prima era».`);
+  const altra = Object.entries(rm).find(([p, v]) => v === id && p !== L.pos);
+  if (id && altra && !L.nuovaConf) sov.push(`L'ID <b>${esc(id)}</b> è già salvato su ${esc(descrPos(altra[0]))}.`);
+  $('cSovr').innerHTML = sov.map(t => `<div class="avviso e">${t}</div>`).join('');
+  $('cOk').disabled = !(L.pos && /^[0-9A-F]{4,12}$/.test(id));
+}
+
+async function confermaLettura() {
+  const L = S.lettura, t = S.targa, id = normId($('cId').value);
+  if (!L.pos || !/^[0-9A-F]{4,12}$/.test(id)) return;
+  const s = scheda(t);
+  if (L.nuovaConf) {
+    accoda({ tipo: 'conf', targa: t, metodo: 'PATCH', percorso: '/mezzi/' + t, corpo: { configurazione: L.nuovaConf } });
+    s.mezzo.configurazione = L.nuovaConf; s.ruote = []; salvaScheda(s);
+  }
+  const r = (s.ruote || []).find(x => x.posizione === L.pos);
+  if (!(r && r.sensore_id === id)) {
+    accoda({ tipo: 'ruota', targa: t, pos: L.pos, metodo: 'PUT', percorso: `/mezzi/${t}/ruote/${L.pos}`, corpo: { sensore_id: id, versione: r ? r.versione : 0 } });
+    aggiornaLocale(t, L.pos, id);
+  }
+  // prossima ruota vuota
+  const s2 = scheda(t), rm = mappaRuote(s2), tutte = posizioni(s2.mezzo.configurazione);
+  const i = tutte.indexOf(L.pos), prossima = [...tutte.slice(i + 1), ...tutte.slice(0, i)].find(p => !rm[p]) || null;
+  S.sel = prossima; S.fotoPer = null; S.lettura = null;
+  S.messaggio = prossima ? `Salvato. Prossima ruota vuota: <b>${esc(descrPos(prossima))}</b>.` : 'Salvato. Tutte le ruote hanno un ID.';
+  mostra('scheda'); disegnaScheda();
+}
+function aggiornaLocale(t, pos, id) {
+  const s = scheda(t); s.ruote = s.ruote || [];
+  const ora = new Date().toISOString(), r = s.ruote.find(x => x.posizione === pos);
+  if (r) { r.id_precedente = r.sensore_id; r.sensore_id = id; r.aggiornato = ora; r.versione++; }
+  else s.ruote.push({ posizione: pos, sensore_id: id, id_precedente: null, aggiornato: ora, versione: 1 });
+  s.mezzo.aggiornato = ora; salvaScheda(s);
+}
+
+// ---------- assi a mano ----------
+function apriAssi() {
+  const s = scheda(S.targa), c = (s.mezzo.configurazione || [2, 4]).slice();
+  $('aNum').innerHTML = Array.from({ length: 10 }, (_, i) => `<option value="${i + 1}"${i + 1 === c.length ? ' selected' : ''}>${i + 1}</option>`).join('');
+  S.assi = c; disegnaAssi(); mostra('assi');
+}
+function disegnaAssi() {
+  const n = +$('aNum').value; while (S.assi.length < n) S.assi.push(2); S.assi.length = n;
+  $('aAssi').innerHTML = S.assi.map((k, i) => `<div class="ax"><b>Asse ${i + 1}</b>
+    <label><input type="radio" name="ax${i}" value="2"${k === 2 ? ' checked' : ''}>Singole</label>
+    <label><input type="radio" name="ax${i}" value="4"${k === 4 ? ' checked' : ''}>Gemellate</label></div>`).join('');
+  $('aAssi').querySelectorAll('input').forEach(x => x.addEventListener('change', () => { S.assi[+x.name.slice(2)] = +x.value; anteprimaAssi(); }));
+  anteprimaAssi();
+}
+function anteprimaAssi() {
+  const tot = S.assi.reduce((a, b) => a + b, 0);
+  $('aAnteprima').innerHTML = svgSchema(S.assi, {}, { tipo: scheda(S.targa).mezzo.tipo }) + `<div class="stato mute">${tot} ruote${tot > 26 ? ' · massimo 26' : ''}</div>`;
+  $('aOk').disabled = tot > 26;
+}
+async function salvaAssi() {
+  const s = scheda(S.targa), t = S.targa, nuova = S.assi.slice();
+  const valide = posizioni(nuova), perse = (s.ruote || []).filter(r => !valide.includes(r.posizione));
+  if (perse.length && !(await chiedi(`Con questa configurazione si perdono ${perse.length} ID già salvati. Continuare?`, [['Continua', true, 'red'], ['Annulla', false]]))) return;
+  accoda({ tipo: 'conf', targa: t, metodo: 'PATCH', percorso: '/mezzi/' + t, corpo: { configurazione: nuova } });
+  s.mezzo.configurazione = nuova; s.ruote = (s.ruote || []).filter(r => valide.includes(r.posizione)); salvaScheda(s);
+  S.fallimenti = 0; apriScheda(t, 'Configurazione salvata.');
+}
+
+// ---------- avvio ----------
+document.addEventListener('DOMContentLoaded', () => {
+  $('loginForm').addEventListener('submit', accedi);
+  document.querySelectorAll('[data-nuova]').forEach(b => b.addEventListener('click', () => apriNuova(b.dataset.nuova)));
+  document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => mostra('home')));
+  $('bRecupera').addEventListener('click', () => { $('rInput').value = ''; $('recEsito').innerHTML = ''; mostra('recupera'); setTimeout(() => $('rInput').focus(), 50); });
+  $('bEsci').addEventListener('click', () => esci(false));
+  $('tInput').addEventListener('input', () => ($('tAnteprima').textContent = normTarga($('tInput').value)));
+  $('targaForm').addEventListener('submit', avantiTarga);
+  $('recForm').addEventListener('submit', cercaTarga);
+  $('recEsito').addEventListener('click', ev => {
+    const a = ev.target.closest('[data-apri]'); if (a) return apriTarga(a.dataset.apri);
+    const c = ev.target.closest('[data-crea]');
+    if (c) { apriNuova(c.dataset.crea); $('tInput').value = c.dataset.t; $('tAnteprima').textContent = c.dataset.t; avantiTarga(new Event('submit')); }
+  });
+  $('sAvvisi').addEventListener('click', ev => { const b = ev.target.closest('[data-conf]'); if (b) risolviConflitto(+b.dataset.conf, b.dataset.scelta); });
+  $('bCorreggiTarga').addEventListener('click', correggiTarga);
+  $('bAssiMano').addEventListener('click', apriAssi);
+  $('bElimina').addEventListener('click', eliminaMezzo);
+  $('fotoInput').addEventListener('change', fotoScelta);
+  $('cId').addEventListener('input', () => { const v = normId($('cId').value); if ($('cId').value !== v) $('cId').value = v; disegnaChips(null); disegnaConferma(); });
+  $('cOk').addEventListener('click', confermaLettura);
+  $('cAnnulla').addEventListener('click', () => { S.lettura = null; mostra('scheda'); disegnaScheda(); });
+  $('aNum').addEventListener('change', disegnaAssi);
+  $('aOk').addEventListener('click', salvaAssi);
+  $('aAnnulla').addEventListener('click', () => { mostra('scheda'); disegnaScheda(); });
+  window.addEventListener('online', invia);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) invia(); });
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (leggi(K.token, null)) { mostra('home'); invia(); } else mostra('login');
+});
+</script>
+</body>
+</html>

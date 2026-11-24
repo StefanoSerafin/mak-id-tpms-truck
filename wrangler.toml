@@ -1,0 +1,15 @@
+name = "mak-id-tpms-truck"
+main = "worker/worker.js"
+compatibility_date = "2025-01-01"
+workers_dev = true
+
+[vars]
+# Indirizzi da cui l'app può chiamare l'API (CORS). localhost serve solo alle prove automatiche.
+ORIGINI = "https://stefanoserafin.github.io,http://localhost:8765"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mak-id-tpms-truck"
+database_id = "de101a59-5ecf-41ee-8bd7-1c7f367fdb0d"
+
+# Nessun segreto: le password delle officine stanno nel database come hash PBKDF2 (strumenti/utenze.py).

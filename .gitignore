@@ -1,0 +1,12 @@
+venv
+venv.nosync
+*.nosync
+prove/foto/
+.wrangler/
+.dev.vars
+node_modules/
+__pycache__/
+.DS_Store
+_prova_lettore.html
+_crea_modelli.html
+* 2.*
