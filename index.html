@@ -162,6 +162,8 @@ select{font:inherit;font-size:16px;padding:10px;border:1px solid #c5c9cf;border-
 <script>
 'use strict';
 const API = 'https://mak-id-tpms-truck.serafin-stefano72.workers.dev';
+// FASE DI PROVA: niente login, si usa l'officina di prova del server. Prima del lancio: false (e togliere ACCESSO_LIBERO da wrangler.toml).
+const ACCESSO_LIBERO = true;
 const K = { token: 'idtpms.token', off: 'idtpms.officina', cache: 'idtpms.cache', coda: 'idtpms.coda', conf: 'idtpms.conflitti' };
 const TIPI = { trattore_motrice: 'Trattore / Motrice', rimorchio_semirimorchio: 'Rimorchio / Semirimorchio' };
 const $ = id => document.getElementById(id);
@@ -279,7 +281,7 @@ async function esci(scaduta) {
 
 // ---------- home ----------
 function aggiornaHome() {
-  $('nomeOff').textContent = leggi(K.off, '');
+  $('nomeOff').textContent = ACCESSO_LIBERO && !leggi(K.token, null) ? 'Versione di prova: accesso libero, solo targhe di prova' : leggi(K.off, '');
   const n = coda().length;
   avviso('homeStato', n ? `${n} ${n === 1 ? 'modifica in attesa' : 'modifiche in attesa'} di rete: partono da sole appena c'è connessione.` : '', 'w');
 }
@@ -658,6 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('online', invia);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) invia(); });
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (ACCESSO_LIBERO) {
+    $('bEsci').style.display = 'none';
+    if (!leggi(K.token, null)) { mostra('home'); invia(); return; }
+  }
   if (leggi(K.token, null)) { mostra('home'); invia(); } else mostra('login');
 });
 </script>

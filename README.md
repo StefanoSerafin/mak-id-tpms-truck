@@ -36,6 +36,10 @@ Le foto non lasciano mai il telefono: la lettura avviene nel browser (`lettore.j
 | `prove/attesi.json` | Valori corretti delle foto di prova (le foto stanno in `prove/foto/`, fuori da git) |
 | `docs/nota-dati-per-mak.md` | Nota per la direzione MAK sui dati trattati |
 
+## Fase di prova: accesso libero (dal 2026-11-24)
+
+Su richiesta di Stefano, per le prove il login è spento: chi apre la pagina scrive nell'officina di prova A. Usare solo targhe di prova. **Prima del lancio** togliere `ACCESSO_LIBERO` da `wrangler.toml` e ridistribuire il Worker, mettere `ACCESSO_LIBERO = false` in `index.html`, aumentare la cache in `sw.js` e pubblicare. Il login e le utenze restano pronti; `strumenti/prova_app.py` si rilancia dopo averlo riacceso.
+
 ## Officine (utenze)
 
 Nessuna registrazione libera: l'agente MAK chiede l'attivazione, poi dal Mac:

@@ -6,6 +6,9 @@ workers_dev = true
 [vars]
 # Indirizzi da cui l'app può chiamare l'API (CORS). localhost serve solo alle prove automatiche.
 ORIGINI = "https://stefanoserafin.github.io,http://localhost:8765"
+# FASE DI PROVA: senza login si scrive nell'officina di prova A. Togliere questa riga prima del lancio
+# (e mettere ACCESSO_LIBERO = false in index.html).
+ACCESSO_LIBERO = "prova-a@esempio.invalid"
 
 [[d1_databases]]
 binding = "DB"

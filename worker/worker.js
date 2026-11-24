@@ -138,6 +138,13 @@ function nuovoToken() {
 async function officinaDaSessione(req, env) {
   const a = req.headers.get('Authorization') || '';
   const m = a.match(/^Bearer ([A-Za-z0-9_-]{20,100})$/);
+  if (!m && env.ACCESSO_LIBERO) {
+    // FASE DI PROVA: senza login tutte le richieste finiscono nell'officina indicata in wrangler.toml.
+    // Prima del lancio togliere ACCESSO_LIBERO da wrangler.toml e ridistribuire.
+    const o = await env.DB.prepare('SELECT id, nome, attiva FROM officine WHERE email = ?').bind(env.ACCESSO_LIBERO).first();
+    if (!o || !o.attiva) throw new Errore(401, 'Officina di prova non disponibile.');
+    return o;
+  }
   if (!m) throw new Errore(401, 'Accesso richiesto.');
   const r = await env.DB.prepare(
     `SELECT s.officina_id AS id, s.scade, o.attiva, o.nome FROM sessioni s JOIN officine o ON o.id = s.officina_id WHERE s.token_hash = ?`
